@@ -1,0 +1,27 @@
+
+rule dlfile
+  command = ./dlfile.sh $dlfileurl $dlfilesha256 $out
+
+rule installopenbsd
+  command = ./installopenbsd.sh $in $out
+
+rule qemuimgconvert
+  command = qemu-img convert $in $out
+
+rule configureopenbsd
+  command = ./configopenbsd.sh $in $out
+
+rule gcedisk
+  command = ./mkgcedisk.sh $in $out
+
+build install62.iso: dlfile
+  dlfileurl = https://mirror.aarnet.edu.au/pub/OpenBSD/6.2/amd64/install62.iso
+  dlfilesha256 = b7994d29c7db3087db65158901d700fb7d10500b9b7496c1d86b285cabce0a2b
+
+build openbsd62.qcow2: installopenbsd install62.iso install.conf
+
+build openbsd62-gce.qcow2: configureopenbsd openbsd62.qcow2 ./gcesetup.sh
+
+build openbsd62-gce.tar.gz: gcedisk openbsd62-gce.qcow2
+
+default openbsd62-gce.tar.gz
